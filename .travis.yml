@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "6"
+before_script:
+  - npm install -g grunt grunt-cli
+script: grunt ci-build
+after_success:
+- grunt reportCoveralls
+- grunt releaseToNPM
