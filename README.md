@@ -107,5 +107,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* The excellent documentation on the method [here](https://www.swimmingresults.org/downloads/equivalent-time-share/algorithm.php) made this all possible
 * The very reusable git documents from [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
