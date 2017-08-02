@@ -2,6 +2,10 @@
 
 This is a javascript website scraper for the ASA personal swim times. Pass in swimmer ASA Number and get back the personal best history from ASA.
 
+## Permissions
+
+This is not affiliated to the ASA, or any of its partners / affiliates. It is intended to be used as an example of how to connect to a website. If you intend to use more broadly, you may require permission.
+
 ## Status
 [![Build Status](https://travis-ci.org/paulcull/asa-swim-time-scraper.svg?branch=master)](https://travis-ci.org/paulcull/asa-swim-time-scraper)
 [![Coverage Status](https://coveralls.io/repos/github/paulcull/asa-swim-time-scraper/badge.svg?branch=master)](https://coveralls.io/github/paulcull/asa-swim-time-scraper?branch=master)
