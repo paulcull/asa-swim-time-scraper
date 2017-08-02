@@ -2,7 +2,7 @@
     'use strict';
 
     var scraper = require('./scraper.js').scrapeSite;
-    var inspect = require('eyes').inspector({ maxLength: false });
+    //var inspect = require('eyes').inspector({ maxLength: false });
 
     var isDebugMode = false;
     var URLHost = 'https://www.swimmingresults.org';
@@ -54,7 +54,7 @@
 
                 scraper(url).then(function(swims) {
                         console.debug('got my result, size is ' + swims.length);
-                        inspect(swims);
+                        //inspect(swims);
                         resolve(swims);
                     })
                     .catch(function(error) {

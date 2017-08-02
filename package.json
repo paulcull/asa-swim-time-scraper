@@ -28,9 +28,7 @@
         "asa-swim-time-converter": "^1.0.8",
         "cheerio": "^1.0.0-rc.2",
         "cheerio-tableparser": "^1.0.1",
-        "eyes": "^0.1.8",
         "moment": "^2.18.1",
-        "promise": "^8.0.1",
         "request": "^2.81.0"
     },
     "devDependencies": {
@@ -38,6 +36,7 @@
         "chai-as-promised": "^7.1.1",
         "coveralls": "^2.13.1",
         "documentation": "^5.0.1",
+        "eyes": "^0.1.8",
         "grunt": "^1.0.1",
         "grunt-cli": "^1.2.0",
         "grunt-contrib-clean": "^1.1.0",

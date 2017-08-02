@@ -15,9 +15,11 @@
     // getTime(stroke, convertFrom, convertTo, timing)
     // Positive Test - From 50
     it('Correctly get ASA swimmer times', function() {
+        //allow sufficient time
+        this.timeout(5000);
         //define some data to compare against
         // var blah = '62.2';
-        //call the function we're testing 1:03.50
+        //call the function we're testing
         var gtPromise = gt('1168208');
         // return gtPromise.should.eventually.equal(blah);
         return gtPromise.should.eventually.be.fulfilled;
