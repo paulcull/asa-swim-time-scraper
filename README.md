@@ -80,12 +80,11 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 These are things that should be done to complete.
 
  - [ ] Reduce / remove external dependancies
- - [ ] Add project documentation
- - [ ] Add simple example
- - [ ] Extend test cases to all strokes / pool lengths
- - [ ] Setup travis-ci
- - [ ] Add grunt to manage a min step and create a smaller footprint library
- - [ ] Introduce dependency monitoring
+ - [X] Add project documentation
+ - [X] Add simple example
+ - [X] Setup travis-ci
+ - [X] Add grunt to manage a min step and create a smaller footprint library
+ - [X] Introduce dependency monitoring
  - [ ] Publish to npm.org
 
 ## Versioning
