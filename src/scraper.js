@@ -51,15 +51,15 @@
                                 //convert stroke to converted stoke
                                 stroke = strokes[data[0][j]] === null ? data[0][j] : strokes[data[0][j]];
 
-                                console.debug('1.....', data[0][j]);
-                                console.debug('2.....', strokes[data[0][j]]);
-                                console.debug('3.....', stroke);
+                                // console.debug('1.....', data[0][j]);
+                                // console.debug('2.....', strokes[data[0][j]]);
+                                // console.debug('3.....', stroke);
 
 
                                 var swim = {
                                     course: SCLC,
                                     stroke: stroke,
-                                    dataObtained: moment(data[3][j], 'DD/MM/YY').toDate(),
+                                    dateObtained: moment(data[3][j], 'DD/MM/YY').toDate(),
                                     timeDate: [{
                                         course: SCLC,
                                         timing: data[1][j],

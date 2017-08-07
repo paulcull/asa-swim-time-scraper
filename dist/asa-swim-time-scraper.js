@@ -126,7 +126,7 @@
                                 var swim = {
                                     course: SCLC,
                                     stroke: stroke,
-                                    dataObtained: moment(data[3][j], 'DD/MM/YY').toDate(),
+                                    dateObtained: moment(data[3][j], 'DD/MM/YY').toDate(),
                                     timeDate: [{
                                         course: SCLC,
                                         timing: data[1][j],
