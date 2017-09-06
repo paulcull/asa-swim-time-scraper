@@ -1,6 +1,6 @@
 {
   "name": "asa-swim-time-scraper",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Scrape swimmer results from ASA website and return as JSON",
   "main": "dist/asa-swim-time-scraper",
   "repository": "https://github.com/paulcull/asa-swim-time-scraper",
