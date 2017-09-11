@@ -8,15 +8,15 @@
 
     chai.use(chaiAsPromised);
 
-    var expect = chai.expect;
-    var assert = chai.assert;
+    // var expect = chai.expect;
+    // var assert = chai.assert;
     var should = chai.should();
 
     // getTime(stroke, convertFrom, convertTo, timing)
     // Positive Test - From 50
     it('Correctly get ASA swimmer times', function() {
         //allow sufficient time
-        this.timeout(10000);
+        this.timeout(20000);
         //define some data to compare against
         // var blah = '62.2';
         //call the function we're testing

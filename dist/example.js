@@ -1,0 +1,1 @@
+!function(){"use strict";var e=0;(0,require("./index.js").getTimes)("1168208").then(function(n){e=n.length,console.log(JSON.stringify(n))})}();

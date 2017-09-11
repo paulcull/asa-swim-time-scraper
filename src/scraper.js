@@ -5,7 +5,7 @@
     var ctp = require('cheerio-tableparser');
     var request = require('request');
     var strokes = require('./strokeList').strokeTable;
-    //var inspect = require('eyes').inspector({ maxLength: false });
+    // var inspect = require('eyes').inspector({ maxLength: false });
     // var _ = require('underscore');
     var moment = require('moment');
     var convertTime = require('asa-swim-time-converter').getTime;
@@ -36,7 +36,7 @@
                         ctp($);
                         var data = $(t).parsetable(true, true, true);
 
-                        //inspect(data);
+                        // inspect(data);
 
                         // get course
                         var SCLC = i === 0 ? 'LC' : 'SC';

@@ -1,7 +1,0 @@
-
-[0m[0m
-[32m  ✓[0m[90m ASA Number invalid[0m
-[32m  ✓[0m[90m Correctly get ASA swimmer times[0m[31m (283ms)[0m
-
-[92m [0m[32m 2 passing[0m[90m (322ms)[0m
-
