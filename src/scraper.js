@@ -4,7 +4,7 @@
     var cheerio = require('cheerio');
     var ctp = require('cheerio-tableparser');
     var request = require('request');
-    var strokes = require('./strokeList');
+    var strokes = require('./strokeList').strokeTable;
     //var inspect = require('eyes').inspector({ maxLength: false });
     // var _ = require('underscore');
     var moment = require('moment');
@@ -16,6 +16,7 @@
     var scraper = {
 
         scrapeSite: function scrapeSite(url) {
+            // exports.scrapeSite = function(url) {
             return new Promise(function(resolve, reject) {
                 request(url, function(err, response, body) {
                     if (err) { reject(err); }

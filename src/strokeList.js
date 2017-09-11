@@ -1,4 +1,4 @@
-var strokeTable = {
+exports.strokeTable = {
     '50 Freestyle': '50 Free',
     '100 Freestyle': '100 Free',
     '200 Freestyle': '200 Free',
@@ -19,4 +19,4 @@ var strokeTable = {
     '400 Individual Medley': '400 IM'
 };
 
-module.exports = strokeTable;
+// module.exports = strokeTable;

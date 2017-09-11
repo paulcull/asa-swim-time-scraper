@@ -1,7 +1,8 @@
 (function() {
     'use strict';
 
-    var scraper = require('./scraper.js').scrapeSite;
+    // var scraper = require('./scraper.js').scrapeSite;
+    var scraper = require('./scraper');
     //var inspect = require('eyes').inspector({ maxLength: false });
 
     var isDebugMode = false;
@@ -52,7 +53,8 @@
                     '&tiref=' + asaNumber +
                     '&mode=' + 'A';
 
-                scraper(url).then(function(swims) {
+                scraper.scrapeSite(url).then(function(swims) {
+                        // scraper(url).then(function(swims) {
                         console.debug('got my result, size is ' + swims.length);
                         //inspect(swims);
                         resolve(swims);

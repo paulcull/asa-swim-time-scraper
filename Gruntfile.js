@@ -3,37 +3,65 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
-            beforeconcat: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
-            afterconcat: ['build/<%= pkg.name %>.js']
+            beforerequirejs: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
+            // afterrequirejs: []
+            // beforeconcat: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
+            // afterconcat: []
+            // afterconcat: ['build/<%= pkg.name %>.js']
         },
         watch: {
             files: ['<%= jshint.files %>'],
             tasks: ['jshint', 'mochaTest']
         },
+        requirejs: {
+
+            compile: {
+                options: {
+                    appDir: 'src/',
+                    baseUrl: '.',
+                    dir: 'build/',
+                    optimize: 'uglify',
+                    modules: [{
+                            name: 'scraper'
+                        },
+                        {
+                            name: 'index'
+                        }
+                    ],
+                    logLevel: 0,
+                    findNestedDependencies: true,
+                    fileExclusionRegExp: /^\./,
+                    inlineText: true
+                }
+            }
+        },
         clean: {
             build: {
-                src: ['build']
+                src: ['build/**/*', 'target/**/*']
             },
             dist: {
-                src: ['build', 'dist/**/*']
+                src: ['build/**/*', 'target/**/*', 'dist/**/*']
             },
             coverage: {
                 src: ['coverage/**']
             }
         },
-        concat: {
-            options: {
-                // define a string to put between each file in the concatenated output
-                // separator: ';'
-                separator: ''
-            },
-            dist: {
-                // the files to concatenate (exclue example)
-                src: ['src/**/*.js', '!src/example.js', '!src/*mongo*.js'],
-                // the location of the resulting JS file
-                dest: 'build/<%= pkg.name %>.js'
-            }
-        },
+        // concat: {
+        //     options: {
+        //         // define a string to put between each file in the concatenated output
+        //         // separator: ';'
+        //         separator: ''
+        //     },
+        //     dist: {
+        //         // the files to concatenate (exclue example)
+        //         src: [],
+        //         // src: ['target/**/*.js', '!target/example.js', '!target/*mongo*.js'],
+        //         // src: ['src/**/*.js', '!src/example.js', '!src/*mongo*.js'],
+        //         // the location of the resulting JS file
+        //         // dest: 'build/<%= pkg.name %>.js'
+        //         dest: ''
+        //     }
+        // },
         mochaTest: {
             test: {
                 options: {
@@ -88,15 +116,15 @@ module.exports = function(grunt) {
                 }
             },
         },
-        uglify: {
-            options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy - mm - dd ") %> */\n'
-            },
-            build: {
-                src: 'build/<%= pkg.name %>.js',
-                dest: 'dist/<%= pkg.name %>.min.js'
-            }
-        },
+        // uglify: {
+        //     options: {
+        //         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy - mm - dd ") %> */\n'
+        //     },
+        //     build: {
+        //         src: 'build/<%= pkg.name %>.js',
+        //         dest: 'dist/<%= pkg.name %>.min.js'
+        //     }
+        // },
         copy: {
             conversionTables: {
                 expand: true,
@@ -138,8 +166,9 @@ module.exports = function(grunt) {
     //load the dependencies
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-requirejs');
+    // grunt.loadNpmTasks('grunt-contrib-uglify');
+    // grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-mocha-istanbul');
     grunt.loadNpmTasks('grunt-coveralls');
@@ -151,11 +180,14 @@ module.exports = function(grunt) {
     //set the tasks / taskmaps
     grunt.registerTask('reportCoveralls', ['clean:coverage', 'mocha_istanbul:coverage', 'coveralls']);
     grunt.registerTask('coverage', ['clean:coverage', 'mocha_istanbul:coverage']);
-    grunt.registerTask('ci-build', ['clean:coverage', 'clean:dist', 'jshint:beforeconcat', 'mochaTest', 'documentation', 'reportCoveralls', 'concat', 'jshint:afterconcat', 'uglify', 'copy:main', 'copy:conversionTables']);
-    grunt.registerTask('build', ['clean:dist', 'jshint:beforeconcat', 'mochaTest', 'documentation', 'concat', 'jshint:afterconcat', 'uglify', 'copy:main', 'copy:conversionTables']);
+    grunt.registerTask('ci-build', ['clean:dist', 'jshint:beforerequirejs', 'documentation', 'mochaTest', 'requirejs', 'copy:main', 'copy:conversionTables']);
+    grunt.registerTask('build', ['clean:dist', 'jshint:beforerequirejs', 'documentation', 'mochaTest', 'requirejs', 'copy:main', 'copy:conversionTables']);
     grunt.registerTask('test', ['clean:coverage', 'jshint', 'mochaTest', 'coverage']);
     grunt.registerTask('watch', ['watch']);
     grunt.registerTask('releaseToNPM', ['build', 'test', 'coverage', 'release']);
+
+    grunt.registerTask('localBuild', ['clean:dist', 'jshint:beforerequirejs', 'documentation', 'requirejs', 'copy:main', 'copy:conversionTables']);
+
 
     grunt.registerTask('default', ['build']);
 

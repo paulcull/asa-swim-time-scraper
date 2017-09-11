@@ -16,7 +16,7 @@
     // Positive Test - From 50
     it('Correctly get ASA swimmer times', function() {
         //allow sufficient time
-        this.timeout(5000);
+        this.timeout(10000);
         //define some data to compare against
         // var blah = '62.2';
         //call the function we're testing
