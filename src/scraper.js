@@ -1,102 +1,207 @@
-(function() {
-    'use strict';
+'use strict';
 
-    var cheerio = require('cheerio');
-    var ctp = require('cheerio-tableparser');
-    var request = require('request');
-    var strokes = require('./strokeList').strokeTable;
-    // var inspect = require('eyes').inspector({ maxLength: false });
-    // var _ = require('underscore');
-    var moment = require('moment');
-    var convertTime = require('asa-swim-time-converter').getTime;
+const cheerio = require('cheerio');
+const convertTime = require('asa-swim-time-converter').getTime;
+const strokes = require('./strokeList').strokeTable;
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    var TableTag = 'table#rankTable';
+const TABLE_SELECTOR = 'table#rankTable';
+const ALLOWED_HOSTNAME = 'www.swimmingresults.org';
+const DEFAULT_TIMEOUT_MS = 10000;
 
-    var scraper = {
+function parseDate(value) {
+    const match = /^(\d{2})\/(\d{2})\/(\d{2})$/.exec(String(value).trim());
+    if (!match) {
+        return null;
+    }
 
-        scrapeSite: function scrapeSite(url) {
-            // exports.scrapeSite = function(url) {
-            return new Promise(function(resolve, reject) {
-                request(url, function(err, response, body) {
-                    if (err) { reject(err); }
-                    if (response.statusCode !== 200) {
-                        reject('Invalid status code: ' + response.statusCode);
-                    }
-                    var $ = cheerio.load(body);
-                    var swimLists = $(TableTag);
+    const day = Number(match[1]);
+    const monthIndex = Number(match[2]) - 1;
+    const shortYear = Number(match[3]);
+    const fullYear = shortYear >= 70 ? 1900 + shortYear : 2000 + shortYear;
+    const result = new Date(Date.UTC(fullYear, monthIndex, day));
 
-                    var swims = [];
+    return Number.isNaN(result.getTime()) ? null : result;
+}
 
-                    for (var i = 0; i < swimLists.length; i = i + 1) {
-                        // get the table
-                        var t = swimLists.get(i);
+function parseTiming(value) {
+    const trimmed = String(value).trim();
+    const match = /^(?:(\d+):)?(\d{1,2})\.(\d{1,3})$/.exec(trimmed);
 
-                        // convert table to array
-                        ctp($);
-                        var data = $(t).parsetable(true, true, true);
+    if (!match) {
+        return null;
+    }
 
-                        // inspect(data);
+    const minutes = Number(match[1] || 0);
+    const seconds = Number(match[2]);
+    const fraction = match[3].padEnd(3, '0');
 
-                        // get course
-                        var SCLC = i === 0 ? 'LC' : 'SC';
-                        var FromPool = i === 0 ? '50m' : '25m';
-                        var ToPool = i === 0 ? '25m' : '50m';
-                        var LCSC = i === 0 ? 'SC' : 'LC'; //get the other one
-                        var stroke = '';
-                        // manipulate array
-                        for (var j = 0; j < data[0].length; j = j + 1) {
+    return {
+        minutes,
+        seconds,
+        milliseconds: Number(fraction)
+    };
+}
 
-                            if (j > 0) {
+function toMomentLikeObject(dateValue, timingValue) {
+    const date = parseDate(dateValue);
+    const timing = parseTiming(timingValue);
 
-                                //convert stroke to converted stoke
-                                stroke = strokes[data[0][j]] === null ? data[0][j] : strokes[data[0][j]];
+    if (!date || !timing) {
+        return null;
+    }
 
-                                // console.debug('1.....', data[0][j]);
-                                // console.debug('2.....', strokes[data[0][j]]);
-                                // console.debug('3.....', stroke);
+    return {
+        years: date.getUTCFullYear(),
+        months: date.getUTCMonth(),
+        date: date.getUTCDate(),
+        hours: 0,
+        minutes: timing.minutes,
+        seconds: timing.seconds,
+        milliseconds: timing.milliseconds
+    };
+}
 
+function getCourseMetadata(index) {
+    if (index === 0) {
+        return {
+            course: 'LC',
+            convertFrom: '50m',
+            convertTo: '25m',
+            alternateCourse: 'SC'
+        };
+    }
 
-                                var swim = {
-                                    course: SCLC,
-                                    stroke: stroke,
-                                    dateObtained: moment(data[3][j], 'DD/MM/YY').toDate(),
-                                    timeDate: [{
-                                        course: SCLC,
-                                        timing: data[1][j],
-                                        dateAndTime: moment(data[3][j] + '-' + data[1][j], 'DD/MM/YY-mm:ss.SSS').toObject(),
-                                        calculated: false
-                                    }, {
-                                        course: LCSC,
-                                        timing: stroke !== '100 IM' ? convertTime(
-                                            stroke,
-                                            FromPool,
-                                            ToPool,
-                                            data[1][j]) : data[1][j],
-                                        dateAndTime: moment(stroke !== '100 IM' ? data[3][j] + '-' + convertTime(
-                                            stroke,
-                                            FromPool,
-                                            ToPool,
-                                            data[1][j]) : data[3][j] + '-' + data[1][j], 'DD/MM/YY-mm:ss.SSS').toObject(),
-                                        calculated: true
-                                    }],
-                                    finaPts: data[2][j],
-                                    meet: data[4][j],
-                                    venue: data[5][j],
-                                    license: data[6][j],
-                                    level: data[7][j],
-                                    dateCollected: new Date()
-                                };
-                                swims.push(swim);
-                            }
-                        }
-                    }
-                    resolve(swims);
-                });
-            });
+    return {
+        course: 'SC',
+        convertFrom: '25m',
+        convertTo: '50m',
+        alternateCourse: 'LC'
+    };
+}
+
+function getStrokeName(value) {
+    return strokes[value] || value;
+}
+
+function getConvertedResult(stroke, courseMetadata, timing) {
+    try {
+        return {
+            timing: convertTime(stroke, courseMetadata.convertFrom, courseMetadata.convertTo, timing),
+            calculated: true
+        };
+    } catch (error) {
+        return {
+            timing,
+            calculated: false
+        };
+    }
+}
+
+function extractCells($, row) {
+    return row.find('th, td').map((_, cell) => {
+        return $(cell).text().replace(/\s+/g, ' ').trim();
+    }).get();
+}
+
+function parseTable($, table, tableIndex, collectedAt) {
+    const rows = $(table).find('tr').toArray().map((row) => extractCells($, $(row)));
+    if (rows.length === 0) {
+        return [];
+    }
+
+    const columns = rows[0].length;
+    const courseMetadata = getCourseMetadata(tableIndex);
+    const swims = [];
+
+    for (let columnIndex = 1; columnIndex < columns; columnIndex += 1) {
+        const rawStroke = rows[0][columnIndex];
+        if (!rawStroke) {
+            continue;
         }
 
-    };
-    module.exports = scraper;
+        const stroke = getStrokeName(rawStroke);
+        const timing = rows[1] && rows[1][columnIndex] ? rows[1][columnIndex] : '';
+        const dateValue = rows[3] && rows[3][columnIndex] ? rows[3][columnIndex] : '';
+        const convertedResult = getConvertedResult(stroke, courseMetadata, timing);
 
-}());
+        swims.push({
+            course: courseMetadata.course,
+            stroke,
+            dateObtained: parseDate(dateValue),
+            timeDate: [{
+                course: courseMetadata.course,
+                timing,
+                dateAndTime: toMomentLikeObject(dateValue, timing),
+                calculated: false
+            }, {
+                course: courseMetadata.alternateCourse,
+                timing: convertedResult.timing,
+                dateAndTime: toMomentLikeObject(dateValue, convertedResult.timing),
+                calculated: convertedResult.calculated
+            }],
+            finaPts: rows[2] && rows[2][columnIndex] ? rows[2][columnIndex] : '',
+            meet: rows[4] && rows[4][columnIndex] ? rows[4][columnIndex] : '',
+            venue: rows[5] && rows[5][columnIndex] ? rows[5][columnIndex] : '',
+            license: rows[6] && rows[6][columnIndex] ? rows[6][columnIndex] : '',
+            level: rows[7] && rows[7][columnIndex] ? rows[7][columnIndex] : '',
+            dateCollected: collectedAt
+        });
+    }
+
+    return swims;
+}
+
+function validateUrl(urlValue) {
+    const url = new URL(urlValue);
+
+    if (url.protocol !== 'https:' || url.hostname !== ALLOWED_HOSTNAME) {
+        throw new Error('ERR: Refusing to scrape an unexpected host');
+    }
+
+    return url;
+}
+
+async function fetchHtml(url, options) {
+    const fetchImpl = options.fetchImpl || global.fetch;
+
+    if (typeof fetchImpl !== 'function') {
+        throw new Error('ERR: No fetch implementation available');
+    }
+
+    const timeoutMs = options.timeoutMs || DEFAULT_TIMEOUT_MS;
+    const response = await fetchImpl(url, {
+        headers: {
+            'user-agent': 'asa-swim-time-scraper/1.x'
+        },
+        signal: AbortSignal.timeout(timeoutMs)
+    });
+
+    if (!response.ok) {
+        throw new Error('ERR: Invalid status code: ' + response.status);
+    }
+
+    return response.text();
+}
+
+async function scrapeSite(urlValue, options = {}) {
+    const url = validateUrl(urlValue);
+    const collectedAt = options.now ? new Date(options.now) : new Date();
+    const body = await fetchHtml(url, options);
+    const $ = cheerio.load(body);
+    const tables = $(TABLE_SELECTOR).toArray();
+
+    return tables.flatMap((table, index) => parseTable($, table, index, collectedAt));
+}
+
+module.exports = {
+    ALLOWED_HOSTNAME,
+    DEFAULT_TIMEOUT_MS,
+    TABLE_SELECTOR,
+    getConvertedResult,
+    parseDate,
+    parseTable,
+    parseTiming,
+    scrapeSite,
+    toMomentLikeObject,
+    validateUrl
+};

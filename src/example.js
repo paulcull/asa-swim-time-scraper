@@ -1,16 +1,14 @@
-(function() {
-    'use strict';
+'use strict';
 
-    var getTimes = require('./index.js').getTimes;
-    // var inspect = require('eyes').inspector({ maxLength: false });
+const { getTimes } = require('./index');
 
-    var asaNo = '1168208';
+async function main() {
+    const asaNumber = '1168208';
+    const swims = await getTimes(asaNumber);
+    console.log(JSON.stringify(swims, null, 2));
+}
 
-    var toProcess = 0;
-    getTimes(asaNo).then(function(swims) {
-        toProcess = swims.length;
-        //console.log('got my result, size is ' + toProcess);
-        console.log(JSON.stringify(swims));
-    });
-
-}());
+main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+});

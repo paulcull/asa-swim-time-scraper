@@ -1,110 +1,61 @@
-# ASA Swim time scraper
+# ASA Swim Time Scraper
 
-This is a javascript website scraper for the ASA personal swim times. Pass in swimmer ASA Number and get back the personal best history from ASA.
+Node library for fetching an athlete's personal-best history from `swimmingresults.org` and returning normalized JSON.
 
-## Permissions
+## Current status
 
-This is not affiliated to the ASA, or any of its partners / affiliates. It is intended to be used as an example of how to connect to a website. If you intend to use more broadly, you may require permission.
+The repo has been modernized around current Node runtimes:
 
-## Status
-[![Build Status](https://travis-ci.org/paulcull/asa-swim-time-scraper.svg?branch=master)](https://travis-ci.org/paulcull/asa-swim-time-scraper)
-[![Coverage Status](https://coveralls.io/repos/github/paulcull/asa-swim-time-scraper/badge.svg?branch=master)](https://coveralls.io/github/paulcull/asa-swim-time-scraper?branch=master)
-[![Greenkeeper badge](https://badges.greenkeeper.io/paulcull/asa-swim-time-scraper.svg)](https://greenkeeper.io/)
-[![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](https://gruntjs.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
-[![NPM Version](https://img.shields.io/npm/v/asa-swim-time-scraper.svg?style=flat)](https://www.npmjs.com/package/asa-swim-time-scraper)
-[![NPM Downloads](https://img.shields.io/npm/dm/asa-swim-time-scraper.svg?style=flat)](https://www.npmjs.com/package/asa-swim-time-scraper)
+- deprecated HTTP/runtime dependencies removed
+- insecure TLS override removed
+- deterministic fixture-based tests added
+- native Node test and coverage workflow in place
 
-## Getting Started
+See [docs/PROJECT_REVIEW.md](./docs/PROJECT_REVIEW.md) for the repository review and [docs/MODERNIZATION_PLAN.md](./docs/MODERNIZATION_PLAN.md) for the upgrade plan that was executed.
 
-Include the library in your project. Pass the ASA Number. The single function will return the times.
+## Install
 
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-None
+```bash
+npm install asa-swim-time-scraper
 ```
 
-### Installing
+## Usage
 
-Install the library using npm...
+```js
+const { getTimes } = require('asa-swim-time-scraper');
 
-```
-npm install --save asa-swim-time-scraper
-```
-
-...or, take the library directly from githb
-
-```
-git clone https://github.com/paulcull/asa-swim-time-scraper
-```
-
-This library uses promises. The function when called returns a promise, allowing you to get on with anything else that you need to.
-There are no runtime 3rd party dependencies in this library.
-
-```
-var getTime = require('asa-swim-time-scraper');
-
-getTimes("99999999").then(function(times){
+getTimes('1168208')
+  .then((times) => {
     console.log(times);
-})
+  })
+  .catch((error) => {
+    console.error(error.message);
+  });
 ```
- - Also check the tests and example
 
+## API
 
-## Running the tests
+### `getTimes(asaNumber, options?)`
 
-There are a limited number of tests. Several negative tests and a couple of checks on times to convert
+Fetches and parses long-course and short-course personal bests for a numeric ASA swimmer ID.
 
+Options:
 
-```
+- `year`: override the target year used in the request URL
+- `timeoutMs`: request timeout in milliseconds
+- `fetchImpl`: custom fetch implementation for testing
+- `now`: override the collection timestamp for testing
+
+Returns a promise resolving to an array of swim records.
+
+## Development
+
+```bash
 npm test
+npm run test:coverage
 ```
 
+## Notes
 
-## Deployment
-
-Not designed to run stand-alone - this should be used as a libray.
-
-## Built With
-
-* [NPM](https://www.npm.org/) - Dependency Management
-* [MOCHA](https://www.mochajs.org/) - Test management
-* [CHAI](http://chaijs.com/) - BDD / TDD assertion (including with [PROMISES](https://github.com/domenic/chai-as-promised))
-
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## TODO
-
-These are things that should be done to complete.
-
- - [ ] Reduce / remove external dependancies
- - [X] Add project documentation
- - [X] Add simple example
- - [X] Setup travis-ci
- - [X] Add grunt to manage a min step and create a smaller footprint library
- - [X] Introduce dependency monitoring
- - [ ] Publish to npm.org
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/paulcull/asa-swimtime-converter/tags).
-
-## Authors
-
-* **Paul Cullender** - *Initial work* - [paulcull](https://github.com/paulcull)
-
-See also the list of [contributors](https://github.com/paulcull/asa-swimtime-converter/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* The very reusable git documents from [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
+- This project is not affiliated with Swim England / ASA.
+- The upstream website structure may change; tests in this repo validate parser behavior against fixtures, not the live site markup.

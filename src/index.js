@@ -1,70 +1,44 @@
-(function() {
-    'use strict';
+'use strict';
 
-    // var scraper = require('./scraper.js').scrapeSite;
-    var scraper = require('./scraper');
-    //var inspect = require('eyes').inspector({ maxLength: false });
+const { scrapeSite } = require('./scraper');
 
-    var isDebugMode = false;
-    var URLHost = 'https://www.swimmingresults.org';
-    var URLPath = '/individualbest/personal_best.php';
+const URL_HOST = 'https://www.swimmingresults.org';
+const URL_PATH = '/individualbest/personal_best.php';
 
-    //debug log support
-    console.debug = function( /* ...args */ ) {
-        if (isDebugMode) {
-            var vargs = Array.prototype.slice.call(arguments);
-            console.log.apply(this, vargs);
-        }
-    };
+function normalizeAsaNumber(asaNumber) {
+    const normalized = String(asaNumber).trim();
 
-    // Exposed Functions
+    if (!/^\d+$/.test(normalized)) {
+        throw new TypeError('ERR: Not a ASA Number');
+    }
 
-    var timings = {
+    return normalized;
+}
 
-        /**
-         *  getTimes function to scrape Swim times from ASA table
-         * getTime(asaNumber)
-         *
-         * inputs
-         * @param {number} asaNumber is the swimmers ASA number.
-         *
-         * returns
-         * @return {array} times form the website
-         *
-         */
-        getTimes: function(asaNumber) {
-            return new Promise(function(resolve, reject) {
+function buildPersonalBestUrl(asaNumber, year = new Date().getFullYear()) {
+    const url = new URL(URL_PATH, URL_HOST);
+    url.searchParams.set('targetyear', String(year));
+    url.searchParams.set('tiref', normalizeAsaNumber(asaNumber));
+    url.searchParams.set('mode', 'A');
+    return url.toString();
+}
 
-                //check asa number is a number
-                if (!asaNumber.match(/[0-9]/i)) {
-                    reject('ERR: Not a ASA Number');
-                }
+async function getTimes(asaNumber, options = {}) {
+    const url = buildPersonalBestUrl(asaNumber, options.year);
 
-                var year = new Date().getFullYear().toString();
+    try {
+        return await scrapeSite(url, options);
+    } catch (error) {
+        throw new Error('ERR: Error getting site times: ' + error.message, {
+            cause: error
+        });
+    }
+}
 
-                var url = URLHost + URLPath + '?' +
-                    //'back=showmeets' +
-                    '&targetyear=' + year +
-                    //'&masters=' + '0' +
-                    //'&pgm=' + '1' +
-                    //'&meetcode=' + '10225' +
-                    //'&targetAZ=' + 'C' +
-                    //'&pgs=' + '1' +
-                    '&tiref=' + asaNumber +
-                    '&mode=' + 'A';
-
-                scraper.scrapeSite(url).then(function(swims) {
-                        // scraper(url).then(function(swims) {
-                        console.debug('got my result, size is ' + swims.length);
-                        //inspect(swims);
-                        resolve(swims);
-                    })
-                    .catch(function(error) {
-                        reject('ERR: Error getting site times: ', error);
-                    });
-            });
-        }
-    };
-
-    module.exports = timings;
-}());
+module.exports = {
+    URL_HOST,
+    URL_PATH,
+    buildPersonalBestUrl,
+    getTimes,
+    normalizeAsaNumber
+};
